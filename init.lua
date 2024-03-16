@@ -16,7 +16,6 @@ Kickstart.nvim is a template for your own configuration.
   If you don't know anything about Lua, I recommend taking some time to read through
   a guide. One possible example:
 
-adskfjl
   - https://learnxinyminutes.com/docs/lua/
 
   And then you can explore or search through `:help lua-guide`
@@ -65,10 +64,19 @@ vim.opt.rtp:prepend(lazypath)
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
+  -- config:
+  checker = {
+    enabled = true,
+    concurrency = nil,    -- Set to 1 to check for updates very slowly
+    notify = true,        -- Get a notification when new updates are found
+    frequency = 3600,     -- Check for updates every hour
+    check_pinned = false, -- Check for pinned packages that can't be updated
+  },
+
+
   -- NOTE: First, some plugins that don't require any configuration
 
-  -- Git related plugins
-  'tpope/vim-fugitive',
+  -- Git related plugins 'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
@@ -86,7 +94,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      -- { 'j-hui/fidget.nvim', opts = {}, },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -119,13 +127,14 @@ require('lazy').setup({
   },
 
   {
-    -- Theme inspired by Atom
+    --Theme inspired by Atom
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
       vim.cmd.colorscheme 'onedark'
     end,
   },
+
 
   {
     -- Set lualine as statusline
@@ -137,6 +146,7 @@ require('lazy').setup({
         theme = 'onedark',
         component_separators = '|',
         section_separators = '',
+        disable_background = true,
       },
     },
   },
@@ -145,11 +155,7 @@ require('lazy').setup({
     -- Add indentation guides even on blank lines
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
+    main = "ibl",
   },
 
   -- "gc" to comment visual regions/lines
@@ -175,7 +181,7 @@ require('lazy').setup({
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
-      'nrim-treesitter/nvim-treesitter-textobjects',
+      'nvim-treesitter/nvim-treesitter-textobjects',
     },
     config = function()
       pcall(require('nvim-treesitter.install').update { with_sync = true })
@@ -203,6 +209,12 @@ require('lazy').setup({
   --copilot
   { 'github/copilot.vim' },
 
+  --magma
+  --{ 'dccsillag/magma-nvim',    run = ':UpdateRemotePlugins' },
+
+  --notebook parser
+  --{ "meatballs/notebook.nvim" },
+
   -- NOTE: The import below automatically adds your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -213,6 +225,7 @@ require('lazy').setup({
   --    to get rid of the warning telling you that there are not plugins in `lua/custom/plugins/`.
   { import = 'custom.plugins' },
 }, {})
+
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -288,8 +301,8 @@ require('telescope').setup {
   defaults = {
     mappings = {
       i = {
-            ['<C-u>'] = false,
-            ['<C-d>'] = false,
+        ['<C-u>'] = false,
+        ['<C-d>'] = false,
       },
     },
   },
@@ -342,41 +355,41 @@ require('nvim-treesitter.configs').setup {
       lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
       keymaps = {
         -- You can use the capture groups defined in textobjects.scm
-            ['aa'] = '@parameter.outer',
-            ['ia'] = '@parameter.inner',
-            ['af'] = '@function.outer',
-            ['if'] = '@function.inner',
-            ['ac'] = '@class.outer',
-            ['ic'] = '@class.inner',
+        ['aa'] = '@parameter.outer',
+        ['ia'] = '@parameter.inner',
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ['ac'] = '@class.outer',
+        ['ic'] = '@class.inner',
       },
     },
     move = {
       enable = true,
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
-            [']m'] = '@function.outer',
-            [']]'] = '@class.outer',
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
       },
       goto_next_end = {
-            [']M'] = '@function.outer',
-            [']['] = '@class.outer',
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
       },
       goto_previous_start = {
-            ['[m'] = '@function.outer',
-            ['[['] = '@class.outer',
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
       },
       goto_previous_end = {
-            ['[M'] = '@function.outer',
-            ['[]'] = '@class.outer',
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
       },
     },
     swap = {
       enable = true,
       swap_next = {
-            ['<leader>a'] = '@parameter.inner',
+        ['<leader>a'] = '@parameter.inner',
       },
       swap_previous = {
-            ['<leader>A'] = '@parameter.inner',
+        ['<leader>A'] = '@parameter.inner',
       },
     },
   },
@@ -453,6 +466,28 @@ local servers = {
   },
 }
 
+-- pylsp settings (doesn't work)
+require("lspconfig").pylsp.setup {
+  settings = {
+    pylsp = {
+      plugins = {
+        configurationSources = { "flake8" },
+        pycodestyle = {
+          maxLineLength = 120,
+          indentSize = 2,
+        },
+      },
+    },
+  },
+}
+
+-- ibl setup
+require("ibl").setup({
+  scope = {
+    enabled = false,
+  }
+})
+
 -- Setup neovim lua configuration
 require('neodev').setup()
 
@@ -493,14 +528,14 @@ cmp.setup {
     end,
   },
   mapping = cmp.mapping.preset.insert {
-        ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-Space>'] = cmp.mapping.complete {},
-        ['<CR>'] = cmp.mapping.confirm {
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete {},
+    ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-        ['<M-j>'] = cmp.mapping(function(fallback)
+    ['<M-j>'] = cmp.mapping(function(fallback) --alt+j and alt+k to navigate the completion menu
       if cmp.visible() then
         cmp.select_next_item()
       elseif luasnip.expand_or_jumpable() then
@@ -509,7 +544,7 @@ cmp.setup {
         fallback()
       end
     end, { 'i', 's' }),
-        ['<M-k>'] = cmp.mapping(function(fallback)
+    ['<M-k>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
       elseif luasnip.jumpable(-1) then
@@ -527,3 +562,13 @@ cmp.setup {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+--transparent background
+--vim.cmd([[highlight Normal guibg=none]])
+--vim.cmd([[highlight NonText guibg=none]])
+--vim.cmd([[highlight Normal ctermbg=none]])
+--vim.cmd([[highlight NonText ctermbg=none]])
+
+-- Set transparent background for Neovim Tree
+--vim.cmd([[highlight NvimTreeNormal guibg=none]])
+--vim.cmd([[highlight NvimTreeEndOfBuffer guibg=none]])
