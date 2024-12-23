@@ -80,7 +80,7 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  --'tpope/vim-sleuth',
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -223,6 +223,23 @@ require('lazy').setup({
   --
   --    An additional note is that if you only copied in the `init.lua`, you can just comment this line
   --    to get rid of the warning telling you that there are not plugins in `lua/custom/plugins/`.
+  -- bracket matching
+  { 'andymass/vim-matchup',
+    config = function()
+      vim.g.matchup_matchparen_offscreen = { method = 'popup' }
+    end
+  },
+
+  {
+    "lervag/vimtex",
+    lazy = false,     -- we don't want to lazy load VimTeX
+    -- tag = "v2.15", -- uncomment to pin to a specific release
+    init = function()
+      -- VimTeX configuration goes here, e.g.
+      vim.g.vimtex_view_method = "zathura"
+    end
+  },
+
   { import = 'custom.plugins' },
 }, {})
 
@@ -273,6 +290,17 @@ vim.o.termguicolors = true
 vim.o.scrolloff = 3
 vim.cmd([[autocmd BufEnter * set formatoptions-=cro]])
 vim.o.autoindent = true
+vim.o.shiftwidth = 2
+vim.o.tabstop = 2
+vim.o.expandtab = true
+
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "cpp",
+  callback = function()
+  end,
+})
+
 
 -- [[ Basic Keymaps ]]
 
@@ -333,7 +361,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'javascript', 'svelte', 'html',
-    'css', 'latex', 'json', 'json5', 'yaml', 'help', 'vim' },
+    'css', 'latex', 'json', 'json5', 'yaml', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -466,21 +494,6 @@ local servers = {
   },
 }
 
--- pylsp settings (doesn't work)
-require("lspconfig").pylsp.setup {
-  settings = {
-    pylsp = {
-      plugins = {
-        configurationSources = { "flake8" },
-        pycodestyle = {
-          maxLineLength = 120,
-          indentSize = 2,
-        },
-      },
-    },
-  },
-}
-
 -- ibl setup
 require("ibl").setup({
   scope = {
@@ -514,6 +527,22 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+
+-- pylsp settings
+require 'lspconfig'.pylsp.setup {
+  settings = {
+    pylsp = {
+      plugins = {
+        configurationSources = { "flake8" },
+        pycodestyle = {
+          indentSize = 2,
+          ignore = { 'W191', 'E302', 'E301', 'E501', },
+        },
+      },
+    },
+  },
+}
+
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
