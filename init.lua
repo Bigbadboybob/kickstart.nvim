@@ -76,7 +76,8 @@ require('lazy').setup({
 
   -- NOTE: First, some plugins that don't require any configuration
 
-  -- Git related plugins 'tpope/vim-fugitive',
+  -- Git related plugins
+  'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
@@ -119,10 +120,47 @@ require('lazy').setup({
         change = { text = '~' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      on_attach = function(bufnr)
+        local gs = package.loaded.gitsigns
+
+        local function map(mode, l, r, opts)
+          opts = opts or {}
+          opts.buffer = bufnr
+          vim.keymap.set(mode, l, r, opts)
+        end
+
+        -- Navigation
+        map('n', ']c', function()
+          if vim.wo.diff then return ']c' end
+          vim.schedule(function() gs.next_hunk() end)
+          return '<Ignore>'
+        end, { expr = true, desc = 'Next hunk' })
+
+        map('n', '[c', function()
+          if vim.wo.diff then return '[c' end
+          vim.schedule(function() gs.prev_hunk() end)
+          return '<Ignore>'
+        end, { expr = true, desc = 'Previous hunk' })
+
+        -- Actions
+        map('n', '<leader>hs', gs.stage_hunk, { desc = '[H]unk [S]tage' })
+        map('n', '<leader>hr', gs.reset_hunk, { desc = '[H]unk [R]eset' })
+        map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { desc = '[H]unk [S]tage' })
+        map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { desc = '[H]unk [R]eset' })
+        map('n', '<leader>hS', gs.stage_buffer, { desc = '[H]unk [S]tage buffer' })
+        map('n', '<leader>hu', gs.undo_stage_hunk, { desc = '[H]unk [U]ndo stage' })
+        map('n', '<leader>hR', gs.reset_buffer, { desc = '[H]unk [R]eset buffer' })
+        map('n', '<leader>hp', gs.preview_hunk, { desc = '[H]unk [P]review' })
+        map('n', '<leader>hb', function() gs.blame_line { full = true } end, { desc = '[H]unk [B]lame' })
+        map('n', '<leader>hd', gs.diffthis, { desc = '[H]unk [D]iff' })
+        map('n', '<leader>hD', function() gs.diffthis('~') end, { desc = '[H]unk [D]iff ~' })
+        map('n', '<leader>td', gs.toggle_deleted, { desc = '[T]oggle [D]eleted' })
+
+        -- Text object
+        map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'inner hunk' })
+      end
     },
   },
 
@@ -479,12 +517,55 @@ end
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
+  -- TypeScript/JavaScript
+  ts_ls = {},
 
+  -- Python (better library go-to-definition than pylsp)
+  pyright = {
+    python = {
+      analysis = {
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        diagnosticMode = 'workspace',
+        typeCheckingMode = 'basic',
+      },
+    },
+  },
+
+  -- C/C++
+  clangd = {},
+
+  -- Go
+  gopls = {
+    gopls = {
+      analyses = {
+        unusedparams = true,
+      },
+      staticcheck = true,
+    },
+  },
+
+  -- Rust
+  rust_analyzer = {
+    ['rust-analyzer'] = {
+      checkOnSave = {
+        command = 'clippy',
+      },
+    },
+  },
+
+  -- Web
+  html = {},
+  cssls = {},
+
+  -- Config files
+  jsonls = {},
+  yamlls = {},
+
+  -- Shell
+  bashls = {},
+
+  -- Lua
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -517,7 +598,7 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
--- pylsp settings
+-- pylsp settings (keep for linting, disable features that pyright handles better)
 require 'lspconfig'.pylsp.setup {
   settings = {
     pylsp = {
@@ -527,6 +608,12 @@ require 'lspconfig'.pylsp.setup {
           indentSize = 2,
           ignore = { 'W191', 'E302', 'E301', 'E501', },
         },
+        -- Disable jedi features (pyright handles these better)
+        jedi_completion = { enabled = false },
+        jedi_hover = { enabled = false },
+        jedi_references = { enabled = false },
+        jedi_signature_help = { enabled = false },
+        jedi_symbols = { enabled = false },
       },
     },
   },
