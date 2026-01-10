@@ -535,16 +535,6 @@ local servers = {
   -- C/C++
   clangd = {},
 
-  -- Go
-  gopls = {
-    gopls = {
-      analyses = {
-        unusedparams = true,
-      },
-      staticcheck = true,
-    },
-  },
-
   -- Rust
   rust_analyzer = {
     ['rust-analyzer'] = {
