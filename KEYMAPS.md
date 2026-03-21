@@ -294,6 +294,16 @@ Leader key: `<Space>`
 
 ---
 
+## Jump List (Navigation History)
+
+| Key | Action |
+|-----|--------|
+| `<C-o>` | Go back to previous cursor position |
+| `<C-i>` | Go forward to next cursor position |
+| `:jumps` | Show jump list |
+
+---
+
 ## Misc
 
 | Key | Action |

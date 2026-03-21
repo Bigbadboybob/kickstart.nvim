@@ -6,8 +6,30 @@ vim.g.loaded_netrwPlugin = 1
 vim.opt.termguicolors = true
 
 -- OR setup with some options
+local function on_attach(bufnr)
+  local api = require('nvim-tree.api')
+
+  -- Default mappings
+  api.config.mappings.default_on_attach(bufnr)
+
+  -- Visual mode: mark all selected lines
+  vim.keymap.set('v', 'm', function()
+    local start_line = vim.fn.line("v")
+    local end_line = vim.fn.line(".")
+    if start_line > end_line then
+      start_line, end_line = end_line, start_line
+    end
+    for line = start_line, end_line do
+      vim.api.nvim_win_set_cursor(0, { line, 0 })
+      api.marks.toggle()
+    end
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+  end, { buffer = bufnr, desc = 'Bulk mark in visual mode' })
+end
+
 require("nvim-tree").setup({
 	sort_by = "modification_time",
+	on_attach = on_attach,
 	renderer = {
 		group_empty = true,
 	},
