@@ -13,6 +13,8 @@ This is a Neovim configuration based on kickstart.nvim. It uses lazy.nvim as the
   - `init.lua` - Window navigation keymaps, auto-close logic for NvimTree/ToggleTerm
   - `filetree.lua` - NvimTree setup, opens on VimEnter
   - `terminal.lua` - ToggleTerm setup with terminal keymaps
+  - `markdown.lua` - render-markdown.nvim (`<Space>md` toggles rendering)
+- `lua/custom/md_table_wrap.lua` - render-markdown custom handler: redraws tables wider than the window with word-wrapped cells (not in `plugins/`, since that dir is auto-imported as lazy specs)
 - `lua/kickstart/plugins/autoformat.lua` - LSP format-on-save (disabled by default, toggle with `:FormatToggle`)
 - `pager.lua` - Separate minimal config for Kitty scrollback pager
 
