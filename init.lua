@@ -666,3 +666,16 @@ cmp.setup {
 -- Set transparent background for Neovim Tree
 --vim.cmd([[highlight NvimTreeNormal guibg=none]])
 --vim.cmd([[highlight NvimTreeEndOfBuffer guibg=none]])
+
+-- Claude Manager forwards OSC 52 to and from the viewing terminal. Keep the
+-- native clipboard provider on ordinary local machines.
+if vim.env.CM_TUI_SESSION_ID then
+  local has_osc52, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+  if has_osc52 then
+    vim.g.clipboard = {
+      name = 'OSC 52',
+      copy = { ['+'] = osc52.copy('+'), ['*'] = osc52.copy('*') },
+      paste = { ['+'] = osc52.paste('+'), ['*'] = osc52.paste('*') },
+    }
+  end
+end
