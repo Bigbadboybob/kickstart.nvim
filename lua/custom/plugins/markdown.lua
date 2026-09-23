@@ -15,7 +15,8 @@ return {
   opts = {
     -- Start unrendered; <leader>md toggles rendering on.
     enabled = false,
-    -- latex support needs pylatexenc; disable rather than warn.
+    -- Math is rendered as images by snacks.nvim (see image.lua); render-markdown's
+    -- unicode latex (needs pylatexenc) would double up, so keep it off.
     latex = { enabled = false },
     -- Keep long analysis tables readable: render the full table chrome.
     pipe_table = { style = 'full' },
